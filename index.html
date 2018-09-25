@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>battle city</title>
+		<link href="css/styles.css" rel="stylesheet">
+		<script src="js/scripts.js"></script>
+	</head>
+	
+	<body>
+      <div class="game" id="game"></div>   
+
+			<template id="menuTpl">
+			  <div class="wrap-menu">
+					<div class="punkt-menu">
+						<span class="left">1. Количество врагов: </span>
+						<span class="right" id="enemiesCnt"></span>
+					</div>
+
+					<div class="punkt-menu">
+						<span class="left">2. Прочность стен: </span>
+						<span class="right" id="wallsStrength"></span>
+					</div>
+
+					<div class="punkt-menu">
+						<span class="left">3. старт игры </span>
+						<span class="right" id="start"></span>
+					</div>										
+				</div>
+			</template>  
+
+      <script>
+      	new Game({
+      		gameEl: document.getElementById('game') || document.body
+      	});
+      </script>			    
+	</body>
+</html>
