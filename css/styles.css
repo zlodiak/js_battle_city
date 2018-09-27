@@ -58,3 +58,15 @@ html, body {
     opacity: 0;
     transition: 1s;
   }
+
+
+#next {
+	width: 100px;
+	height: 100px;
+	background: lime;	
+}
+#end {
+	width: 100px;
+	height: 100px;
+	background: red;
+}

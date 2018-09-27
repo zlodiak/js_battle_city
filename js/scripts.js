@@ -4,6 +4,7 @@ class Game {
     this.gameEl = initObj.gameEl;
     this.levelNum = null;    
     this.menu = new Menu({
+      gameObj: this,
       gameEl: this.gameEl,
       exitCallback: this.startGame
     });
@@ -13,22 +14,20 @@ class Game {
     delete this.menu;
     this.levelNum = 1;
 
-    // while (this.levelNum < 3) {
-      this.infoScreen = new infoScreen({
-        gameEl: this.gameEl,
-        topText: 'Уровень ' + this.levelNum,
-        bottomText: 'Нажмите любую клавишу для старта',
-        exitCallback: this.activationLevel
-      });
-    // }
+    this.infoScreen = new InfoScreen({
+      gameEl: this.gameEl,
+      topText: 'Уровень ' + this.levelNum,
+      bottomText: 'Нажмите любую клавишу для старта',
+      exitCallback: this.exitInfoScreen
+    });
   }
 
-  activationLevel() {
-    alert('activationLevel')
-    // console.log('this.levelNum', this.levelNum)
-    // console.log('this.infoScreen', this.infoScreen)
-    // delete this.infoScreen;
-    // alert('level')
+  exitInfoScreen() {
+    delete this.infoScreen;
+    this.level = new Level({
+      gameObj: this,
+      gameEl: this.gameEl
+    });
   }  
 
 }
@@ -36,6 +35,8 @@ class Game {
 class Menu {
 
   constructor(initObj) {
+    console.log('initObj', initObj)
+    this.gameObj = initObj.gameObj;
     this.gameEl = initObj.gameEl;
     this.exitCallback = initObj.exitCallback;
 
@@ -101,16 +102,14 @@ class Menu {
         break;  
       case 51:
         this.stopKeysListen();  
-        this.exitCallback();            
+        this.exitCallback.call(this.gameObj);            
     }     
   }
-
-
 
 }
 
 
-class infoScreen {
+class InfoScreen {
 
   constructor(initObj) {
     console.log(initObj)
@@ -120,10 +119,7 @@ class infoScreen {
     this.exitCallback = initObj.exitCallback;
 
     this.render();
-    document.addEventListener('keypress', () => {
-      console.log('close info screen');
-      this.destroy();
-    });
+    this.startKeysListen();
   }
 
   render() {
@@ -148,8 +144,49 @@ class infoScreen {
 
     setTimeout(() => {
       this.exitCallback();
-    }, 1000);
-    
+    }, 1000);    
+  }
+
+  startKeysListen() {
+    this._keysListenHandler = this._keysListen.bind(this);
+    document.addEventListener('keypress', this._keysListenHandler);
+  }
+
+  stopKeysListen() {
+    document.removeEventListener('keypress', this._keysListenHandler);
+    delete this._keysListenHandler;
+  }  
+
+  _keysListen() {
+    this.stopKeysListen();
+    this.destroy();
+  }
+
+}
+
+class Level {
+
+  constructor(initObj) {
+    this.gameObj = initObj.gameObj;
+    this.gameEl = initObj.gameEl;
+    this.render();
+
+
+  }
+
+  render() {
+    this.gameEl.innerHTML = '';
+
+    const next = document.createElement('div');
+    next.id = 'next';
+    this.gameEl.appendChild(next);
+
+    const end = document.createElement('div');
+    end.id = 'end';
+    this.gameEl.appendChild(end);  
+
+    next.addEventListener('click', () => { console.log(1) });  
+    end.addEventListener('click', () => { console.log(2) });  
   }
 
 }
