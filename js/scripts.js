@@ -1,41 +1,38 @@
 class Game {
 
   constructor(initObj) {
-    this.gameEl = initObj.gameEl;
-    this.levelNum = null;    
+    this.gameEl = initObj.gameEl;   
     this.menu = new Menu({
-      gameObj: this,
-      gameEl: this.gameEl,
-      exitCallback: this.startGame
-    });
-  }
-
-  startGame() {
-    delete this.menu;
-    this.levelNum = 1;
-
-    this.infoScreen = new InfoScreen({
-      gameEl: this.gameEl,
-      topText: 'Уровень ' + this.levelNum,
-      bottomText: 'Нажмите любую клавишу для старта',
-      exitCallback: this.exitInfoScreen
-    });
-  }
-
-  exitInfoScreen() {
-    delete this.infoScreen;
-    this.level = new Level({
       gameObj: this,
       gameEl: this.gameEl
     });
-  }  
+  }
+
+  // startGame() {
+  //   delete this.menu;
+  //   this.levelNum = 1;
+
+  //   this.infoScreen = new InfoScreen({
+  //     gameEl: this.gameEl,
+  //     topText: 'Уровень ' + this.levelNum,
+  //     bottomText: 'Нажмите любую клавишу для старта',
+  //     exitCallback: this.exitInfoScreen
+  //   });
+  // }
+
+  // exitInfoScreen() {
+  //   delete this.infoScreen;
+  //   this.level = new Level({
+  //     gameObj: this,
+  //     gameEl: this.gameEl
+  //   });
+  // }  
 
 }
 
 class Menu {
 
   constructor(initObj) {
-    console.log('initObj', initObj)
     this.gameObj = initObj.gameObj;
     this.gameEl = initObj.gameEl;
     this.exitCallback = initObj.exitCallback;
@@ -55,6 +52,8 @@ class Menu {
     };
 
     this.infoScreen = null;
+    this.levelNum = 1;
+    this.level = null;
 
     this.render();
     this.startKeysListen();
@@ -102,9 +101,32 @@ class Menu {
         break;  
       case 51:
         this.stopKeysListen();  
-        this.exitCallback.call(this.gameObj);            
+        this.startInfoScreen.call(this);           
     }     
   }
+
+  startInfoScreen() {
+    this.infoScreen = new InfoScreen({
+      gameEl: this.gameEl,
+      topText: 'Уровень ' + this.levelNum,
+      bottomText: 'Нажмите любую клавишу для старта',
+      startLevelCallback: this.startLevel,
+      gameOverCallback: this.gameOver
+    });
+  }
+
+  startLevel() {
+    console.log(this.startInfoScreen)
+    this.level = new Level({
+      gameEl: this.gameEl,
+      nextLevelCallback: this.startInfoScreen,    
+      gameOverCallback: this.gameOver
+    });
+  }
+
+  gameOver() {
+    alert('gameOver')
+  }  
 
 }
 
@@ -112,11 +134,11 @@ class Menu {
 class InfoScreen {
 
   constructor(initObj) {
-    console.log(initObj)
     this.gameEl = initObj.gameEl;
     this.topText = initObj.topText;
     this.bottomText = initObj.bottomText;
-    this.exitCallback = initObj.exitCallback;
+    this.startLevelCallback = initObj.startLevelCallback;
+    this.gameOverCallback = initObj.gameOverCallback;
 
     this.render();
     this.startKeysListen();
@@ -142,8 +164,10 @@ class InfoScreen {
       wrapInfoScreenEl.classList += ' hide';
     }
 
+    console.log(this)
     setTimeout(() => {
-      this.exitCallback();
+      console.log(this)
+      this.startLevelCallback();
     }, 1000);    
   }
 
@@ -167,11 +191,11 @@ class InfoScreen {
 class Level {
 
   constructor(initObj) {
-    this.gameObj = initObj.gameObj;
+    console.log(initObj)
     this.gameEl = initObj.gameEl;
+    this.nextLevelCallback = initObj.nextLevelCallback;
+    this.gameOverCallback = initObj.gameOverCallback;
     this.render();
-
-
   }
 
   render() {
@@ -185,8 +209,8 @@ class Level {
     end.id = 'end';
     this.gameEl.appendChild(end);  
 
-    next.addEventListener('click', () => { console.log(1) });  
-    end.addEventListener('click', () => { console.log(2) });  
+    next.addEventListener('click', () => { this.nextLevelCallback(); });  
+    end.addEventListener('click', () => { this.gameOverCallback(); });  
   }
 
 }
