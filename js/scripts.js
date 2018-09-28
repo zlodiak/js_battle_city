@@ -1,8 +1,11 @@
 class Game {
 
   constructor(initObj) {
+    console.log('constructor');
+    this.initObj = initObj;
     this.gameEl = initObj.gameEl;
     this.levelCnt = 1;
+    this.levelCntMax = 3;
     this.playerLife = 100;
 
     this.menu = new Menu({
@@ -11,34 +14,70 @@ class Game {
     });
   }
 
+  reConstructor() {
+    console.log('re_constructor');
+    this.gameEl = this.initObj.gameEl;
+    this.levelCnt = 1;
+    this.levelCntMax = 3;
+    this.playerLife = 100;
+
+    this.menu = new Menu({
+      gameObj: this,
+      gameEl: this.gameEl
+    });    
+  }
+
   destroyMenu() {
     console.log('destroy menu');
+    this.startInfoScreen();
+  }
+
+  startInfoScreen() {
     this.infoScreen = new InfoScreen({
       gameObj: this,
       gameEl: this.gameEl,
       topText: 'Уровень ' + this.levelCnt,
       bottomText: 'Нажмите любую клавишу для старта'
-    });
+    });    
   }
 
-  destroyInfoScreen() {
-    console.log('destroyInfoScreen');
+  startLevel() {
+    console.log('startLevel');
+    delete this.infoScreen;
     this.level = new Level({
       gameObj: this,
-      gameEl: this.gameEl,
-      topText: 'Уровень ' + this.level,
-      bottomText: 'Нажмите любую клавишу для старта'
+      gameEl: this.gameEl
     });
   }
 
-  destroyLevel(isGameOver) {
-    console.log('destroyLevel', isGameOver);
-    if (isGameOver) {
-      alert('game over');
-    } else {
-      ++this.levelCnt;
-      this.destroyMenu();
-    }    
+  startGameComplete() {
+    console.log('startGameComplete');
+    this.infoScreen = new InfoScreen({
+      gameObj: this,
+      gameEl: this.gameEl,
+      topText: 'Игра окончена. Вы выиграли',
+      bottomText: 'Нажмите любую клавишу для начала новой игры'
+    });
+    // delete this.level;
+    // this.reConstructor();
+  }
+
+  startGameOver() {
+    console.log('startGameOver');
+    this.infoScreen = new InfoScreen({
+      gameObj: this,
+      gameEl: this.gameEl,
+      topText: 'Игра окончена. Вы проиграли',
+      bottomText: 'Нажмите любую клавишу для начала новой игры'
+    });     
+  }
+
+  isGameComplete() {
+    return this.levelCnt === this.levelCntMax;
+  }
+
+  isGameOver() {
+    return this.playerLife <= 0;
   }
 
 }
@@ -150,7 +189,11 @@ class InfoScreen {
     }
 
     setTimeout(() => {
-      this.gameObj.destroyInfoScreen();
+      if (this.gameObj.isGameOver()) { 
+        this.gameObj.reConstructor(); 
+      } else {
+        this.gameObj.startLevel();
+      }      
     }, 1000);    
   }
 
@@ -190,8 +233,22 @@ class Level {
     end.id = 'end';
     this.gameEl.appendChild(end);  
 
-    next.addEventListener('click', () => { this.gameObj.destroyLevel(false); });  
-    end.addEventListener('click', () => { this.gameObj.destroyLevel(true); });  
+    next.addEventListener('click', () => { 
+      console.log('next')
+      if (this.gameObj.isGameComplete()) { 
+        console.log('levelcnt === this.gameObj.levelCntMax')
+        this.gameObj.startGameComplete(); 
+      } else {
+        this.gameObj.levelCnt++;
+        this.gameObj.startInfoScreen();
+      }
+    });  
+
+    end.addEventListener('click', () => { 
+      console.log('end');
+      this.gameObj.playerLife = 0;
+      this.gameObj.startGameOver();
+    });
   }
 
 }
