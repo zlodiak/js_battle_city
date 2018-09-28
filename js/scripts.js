@@ -1,32 +1,45 @@
 class Game {
 
   constructor(initObj) {
-    this.gameEl = initObj.gameEl;   
+    this.gameEl = initObj.gameEl;
+    this.levelCnt = 1;
+    this.playerLife = 100;
+
     this.menu = new Menu({
       gameObj: this,
       gameEl: this.gameEl
     });
   }
 
-  // startGame() {
-  //   delete this.menu;
-  //   this.levelNum = 1;
+  destroyMenu() {
+    console.log('destroy menu');
+    this.infoScreen = new InfoScreen({
+      gameObj: this,
+      gameEl: this.gameEl,
+      topText: 'Уровень ' + this.levelCnt,
+      bottomText: 'Нажмите любую клавишу для старта'
+    });
+  }
 
-  //   this.infoScreen = new InfoScreen({
-  //     gameEl: this.gameEl,
-  //     topText: 'Уровень ' + this.levelNum,
-  //     bottomText: 'Нажмите любую клавишу для старта',
-  //     exitCallback: this.exitInfoScreen
-  //   });
-  // }
+  destroyInfoScreen() {
+    console.log('destroyInfoScreen');
+    this.level = new Level({
+      gameObj: this,
+      gameEl: this.gameEl,
+      topText: 'Уровень ' + this.level,
+      bottomText: 'Нажмите любую клавишу для старта'
+    });
+  }
 
-  // exitInfoScreen() {
-  //   delete this.infoScreen;
-  //   this.level = new Level({
-  //     gameObj: this,
-  //     gameEl: this.gameEl
-  //   });
-  // }  
+  destroyLevel(isGameOver) {
+    console.log('destroyLevel', isGameOver);
+    if (isGameOver) {
+      alert('game over');
+    } else {
+      ++this.levelCnt;
+      this.destroyMenu();
+    }    
+  }
 
 }
 
@@ -35,7 +48,6 @@ class Menu {
   constructor(initObj) {
     this.gameObj = initObj.gameObj;
     this.gameEl = initObj.gameEl;
-    this.exitCallback = initObj.exitCallback;
 
     this.enemiesCntIndex = 2;
     this.enemiesCntLabels = {
@@ -50,10 +62,6 @@ class Menu {
       1: 'Железобетонные',
       2: 'Кирпичные'
     };
-
-    this.infoScreen = null;
-    this.levelNum = 1;
-    this.level = null;
 
     this.render();
     this.startKeysListen();
@@ -101,32 +109,10 @@ class Menu {
         break;  
       case 51:
         this.stopKeysListen();  
-        this.startInfoScreen.call(this);           
+        console.log('startt');
+        this.gameObj.destroyMenu();
     }     
   }
-
-  startInfoScreen() {
-    this.infoScreen = new InfoScreen({
-      gameEl: this.gameEl,
-      topText: 'Уровень ' + this.levelNum,
-      bottomText: 'Нажмите любую клавишу для старта',
-      startLevelCallback: this.startLevel,
-      gameOverCallback: this.gameOver
-    });
-  }
-
-  startLevel() {
-    console.log(this.startInfoScreen)
-    this.level = new Level({
-      gameEl: this.gameEl,
-      nextLevelCallback: this.startInfoScreen,    
-      gameOverCallback: this.gameOver
-    });
-  }
-
-  gameOver() {
-    alert('gameOver')
-  }  
 
 }
 
@@ -134,11 +120,10 @@ class Menu {
 class InfoScreen {
 
   constructor(initObj) {
+    this.gameObj = initObj.gameObj;
     this.gameEl = initObj.gameEl;
     this.topText = initObj.topText;
     this.bottomText = initObj.bottomText;
-    this.startLevelCallback = initObj.startLevelCallback;
-    this.gameOverCallback = initObj.gameOverCallback;
 
     this.render();
     this.startKeysListen();
@@ -164,10 +149,8 @@ class InfoScreen {
       wrapInfoScreenEl.classList += ' hide';
     }
 
-    console.log(this)
     setTimeout(() => {
-      console.log(this)
-      this.startLevelCallback();
+      this.gameObj.destroyInfoScreen();
     }, 1000);    
   }
 
@@ -191,10 +174,8 @@ class InfoScreen {
 class Level {
 
   constructor(initObj) {
-    console.log(initObj)
+    this.gameObj = initObj.gameObj;
     this.gameEl = initObj.gameEl;
-    this.nextLevelCallback = initObj.nextLevelCallback;
-    this.gameOverCallback = initObj.gameOverCallback;
     this.render();
   }
 
@@ -209,8 +190,8 @@ class Level {
     end.id = 'end';
     this.gameEl.appendChild(end);  
 
-    next.addEventListener('click', () => { this.nextLevelCallback(); });  
-    end.addEventListener('click', () => { this.gameOverCallback(); });  
+    next.addEventListener('click', () => { this.gameObj.destroyLevel(false); });  
+    end.addEventListener('click', () => { this.gameObj.destroyLevel(true); });  
   }
 
 }
