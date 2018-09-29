@@ -75,3 +75,13 @@ html, body {
   height: 100px;
   background: white;
 }
+
+.game-over-text {
+	font-size: 3em;
+	transition: 2s;
+	color: blue;
+}
+	
+	.transform {
+		font-size: 0em;
+	}

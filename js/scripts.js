@@ -1,7 +1,6 @@
 class Game {
 
   constructor(initObj) {
-    console.log('constructor');
     this.initObj = initObj;
     this.gameEl = initObj.gameEl;
     this.levelCnt = 1;
@@ -15,7 +14,6 @@ class Game {
   }
 
   reConstructor() {
-    console.log('re_constructor');
     this.gameEl = this.initObj.gameEl;
     this.levelCnt = 1;
     this.levelCntMax = 3;
@@ -28,22 +26,23 @@ class Game {
   }
 
   destroyMenu() {
-    console.log('destroy menu');
     this.startInfoScreen();
   }
 
   startInfoScreen() {
-    this.infoScreen = new InfoScreen({
-      gameObj: this,
-      gameEl: this.gameEl,
-      topText: 'Уровень ' + this.levelCnt,
-      bottomText: 'Нажмите любую клавишу для старта'
-    });    
+    if (this.isGameComplete()) {
+
+    } else {
+      this.infoScreen = new InfoScreen({
+        gameObj: this,
+        gameEl: this.gameEl,
+        topText: 'Уровень ' + this.levelCnt,
+        bottomText: 'Нажмите любую клавишу для старта'
+      }); 
+    }   
   }
 
   startLevel() {
-    console.log('startLevel');
-    delete this.infoScreen;
     this.level = new Level({
       gameObj: this,
       gameEl: this.gameEl
@@ -51,29 +50,23 @@ class Game {
   }
 
   startGameComplete() {
-    console.log('startGameComplete');
     this.infoScreen = new InfoScreen({
       gameObj: this,
       gameEl: this.gameEl,
       topText: 'Игра окончена. Вы выиграли',
       bottomText: 'Нажмите любую клавишу для начала новой игры'
     });
-    // delete this.level;
-    // this.reConstructor();
   }
 
   startGameOver() {
-    console.log('startGameOver');
-    this.infoScreen = new InfoScreen({
+    this.gameOverScreen = new GameOverScreen({
       gameObj: this,
-      gameEl: this.gameEl,
-      topText: 'Игра окончена. Вы проиграли',
-      bottomText: 'Нажмите любую клавишу для начала новой игры'
+      gameEl: this.gameEl
     });     
   }
 
   isGameComplete() {
-    return this.levelCnt === this.levelCntMax;
+    return this.levelCnt >= this.levelCntMax;
   }
 
   isGameOver() {
@@ -189,7 +182,7 @@ class InfoScreen {
     }
 
     setTimeout(() => {
-      if (this.gameObj.isGameOver()) { 
+      if (this.gameObj.isGameComplete()) { 
         this.gameObj.reConstructor(); 
       } else {
         this.gameObj.startLevel();
@@ -214,6 +207,42 @@ class InfoScreen {
 
 }
 
+class GameOverScreen {
+
+  constructor(initObj) {
+    this.gameObj = initObj.gameObj;
+    this.gameEl = initObj.gameEl;
+
+    this.render();
+  }
+
+  render() {
+    console.log('go render')
+    this.gameEl.innerHTML = '';
+
+    const gameOverScreenTpl = document.querySelector('#gameOverScreenTpl');
+    console.log(gameOverScreenTpl)
+    const gameOverScreenTplClone = gameOverScreenTpl.content.cloneNode(true);
+    this.gameEl.appendChild(gameOverScreenTplClone);
+
+    setTimeout(() => {        
+      this.destroy();
+    }, 1000);      
+  }
+
+  destroy() {
+    const gameOverTextEl = document.getElementById('gameOverText');    
+    if (gameOverTextEl) {
+      gameOverTextEl.classList += ' transform';
+      setTimeout(() => {
+        this.gameObj.reConstructor();    
+      }, 2000);       
+    }
+   
+  }
+
+}
+
 class Level {
 
   constructor(initObj) {
@@ -234,9 +263,7 @@ class Level {
     this.gameEl.appendChild(end);  
 
     next.addEventListener('click', () => { 
-      console.log('next')
       if (this.gameObj.isGameComplete()) { 
-        console.log('levelcnt === this.gameObj.levelCntMax')
         this.gameObj.startGameComplete(); 
       } else {
         this.gameObj.levelCnt++;
@@ -245,9 +272,10 @@ class Level {
     });  
 
     end.addEventListener('click', () => { 
-      console.log('end');
       this.gameObj.playerLife = 0;
-      this.gameObj.startGameOver();
+      if (this.gameObj.isGameOver()) {
+        this.gameObj.startGameOver();
+      }      
     });
   }
 
