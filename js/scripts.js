@@ -20,35 +20,21 @@ class Game {
   controller(action) {
     switch(action) {
       case 'infoScreen':
-          this.infoScreen = new InfoScreen({
-            gameObj: this,
-            gameEl: this.gameEl,
-            topText: 'Уровень ' + this.levelCnt
-          });
+          this.infoScreen = new InfoScreen(this);
         break;
 
       case 'gameCompleteScreen':
-        this.gameCompleteScreen = new GameCompleteScreen({
-          gameObj: this,
-          gameEl: this.gameEl
-        });      
+        this.gameCompleteScreen = new GameCompleteScreen(this);      
         break;
 
       case 'level':
-        this.level = new Level({
-          gameObj: this,
-          gameEl: this.gameEl
-        });      
+        this.level = new Level(this);      
         break;
 
       case 'gameOverScreen':
-        this.gameOverScreen = new GameOverScreen({
-          gameObj: this,
-          gameEl: this.gameEl
-        });     
+        this.gameOverScreen = new GameOverScreen(this);     
         break;        
     }
-
   }
 
   isGameComplete() {
@@ -131,24 +117,21 @@ class Menu {
 
 class InfoScreen {
 
-  constructor(initObj) {
-    this.gameObj = initObj.gameObj;
-    this.gameEl = initObj.gameEl;
-    this.topText = initObj.topText;
-
+  constructor(gameObj) {
+    this.gameObj = gameObj;
     this.render();
     this.startKeysListen();
   }
 
   render() {
-    this.gameEl.innerHTML = '';
+    this.gameObj.gameEl.innerHTML = '';
 
     const infoScreenTpl = document.querySelector('#infoScreenTpl');
     const infoScreenTplClone = infoScreenTpl.content.cloneNode(true);
-    this.gameEl.appendChild(infoScreenTplClone);
+    this.gameObj.gameEl.appendChild(infoScreenTplClone);
 
-    const topText = document.getElementById('infoTextTop');
-    if (topText) { topText.innerHTML = this.topText; }
+    const levelCntEl = document.getElementById('levelCnt');
+    if (levelCntEl) { levelCntEl.innerHTML = this.gameObj.levelCnt; }
   }
 
   destroy() {
@@ -181,19 +164,17 @@ class InfoScreen {
 
 class GameOverScreen {
 
-  constructor(initObj) {
-    this.gameObj = initObj.gameObj;
-    this.gameEl = initObj.gameEl;
-
+  constructor(gameObj) {
+    this.gameObj = gameObj;
     this.render();
   }
 
   render() {
-    this.gameEl.innerHTML = '';
+    this.gameObj.gameEl.innerHTML = '';
 
     const gameOverScreenTpl = document.querySelector('#gameOverScreenTpl');
     const gameOverScreenTplClone = gameOverScreenTpl.content.cloneNode(true);
-    this.gameEl.appendChild(gameOverScreenTplClone);
+    this.gameObj.gameEl.appendChild(gameOverScreenTplClone);
 
     setTimeout(() => {        
       this.destroy();
@@ -215,19 +196,17 @@ class GameOverScreen {
 
 class GameCompleteScreen {
 
-  constructor(initObj) {
-    this.gameObj = initObj.gameObj;
-    this.gameEl = initObj.gameEl;
-
+  constructor(gameObj) {
+    this.gameObj = gameObj;
     this.render();
   }
 
   render() {
-    this.gameEl.innerHTML = '';
+    this.gameObj.gameEl.innerHTML = '';
 
     const gameCompleteScreenTpl = document.querySelector('#gameCompleteScreenTpl');
     const gameCompleteScreenTplClone = gameCompleteScreenTpl.content.cloneNode(true);
-    this.gameEl.appendChild(gameCompleteScreenTplClone);
+    this.gameObj.gameEl.appendChild(gameCompleteScreenTplClone);
 
     setTimeout(() => {        
       this.destroy();
@@ -241,30 +220,30 @@ class GameCompleteScreen {
       setTimeout(() => {
         this.gameObj.reConstructor();    
       }, 2000);       
-    }
-   
+    }   
   }
 
 }
 
 class Level {
 
-  constructor(initObj) {
-    this.gameObj = initObj.gameObj;
-    this.gameEl = initObj.gameEl;
+  constructor(gameObj) {
+    this.gameObj = gameObj;
     this.render();
   }
 
   render() {
-    this.gameEl.innerHTML = '';
+    this.gameObj.gameEl.innerHTML = '';
 
     const next = document.createElement('div');
     next.id = 'next';
-    this.gameEl.appendChild(next);
+    next.innerHTML = 'to next level';
+    this.gameObj.gameEl.appendChild(next);
 
     const end = document.createElement('div');
     end.id = 'end';
-    this.gameEl.appendChild(end);  
+    end.innerHTML = 'to game over';
+    this.gameObj.gameEl.appendChild(end);  
 
     next.addEventListener('click', () => { 
       this.gameObj.levelCnt++;

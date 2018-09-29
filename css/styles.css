@@ -60,14 +60,17 @@ html, body {
   }
 
 
+#end,
 #next {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center; 
 	width: 100px;
 	height: 100px;
 	background: lime;	
 }
 #end {
-	width: 100px;
-	height: 100px;
 	background: red;
 }
 #minus {
