@@ -82,6 +82,17 @@ html, body {
 	color: blue;
 }
 	
-	.transform {
+	.game-over-text.transform {
 		font-size: 0em;
 	}
+
+.game-complete-text {
+	font-size: 3em;
+	transition: 2s;
+	color: lime;
+}
+	
+	.game-complete-text.transform {
+		font-size: 10em;
+		opacity: 0;
+	}	

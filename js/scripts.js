@@ -8,8 +8,7 @@ class Game {
     this.playerLife = 100;
 
     this.menu = new Menu({
-      gameObj: this,
-      gameEl: this.gameEl
+      gameObj: this
     });
   }
 
@@ -25,52 +24,42 @@ class Game {
     });    
   }
 
-  destroyMenu() {
-    this.startInfoScreen();
-  }
+  controller(action) {
+    switch(action) {
+      case 'infoScreen':
+          this.infoScreen = new InfoScreen({
+            gameObj: this,
+            gameEl: this.gameEl,
+            topText: 'Уровень ' + this.levelCnt
+          });
+        break;
 
-  startInfoScreen() {
-    if (this.isGameComplete()) {
+      case 'gameCompleteScreen':
+        this.gameCompleteScreen = new GameCompleteScreen({
+          gameObj: this,
+          gameEl: this.gameEl
+        });      
+        break;
 
-    } else {
-      this.infoScreen = new InfoScreen({
-        gameObj: this,
-        gameEl: this.gameEl,
-        topText: 'Уровень ' + this.levelCnt,
-        bottomText: 'Нажмите любую клавишу для старта'
-      }); 
-    }   
-  }
+      case 'level':
+        this.level = new Level({
+          gameObj: this,
+          gameEl: this.gameEl
+        });      
+        break;
 
-  startLevel() {
-    this.level = new Level({
-      gameObj: this,
-      gameEl: this.gameEl
-    });
-  }
+      case 'gameOverScreen':
+        this.gameOverScreen = new GameOverScreen({
+          gameObj: this,
+          gameEl: this.gameEl
+        });     
+        break;        
+    }
 
-  startGameComplete() {
-    this.infoScreen = new InfoScreen({
-      gameObj: this,
-      gameEl: this.gameEl,
-      topText: 'Игра окончена. Вы выиграли',
-      bottomText: 'Нажмите любую клавишу для начала новой игры'
-    });
-  }
-
-  startGameOver() {
-    this.gameOverScreen = new GameOverScreen({
-      gameObj: this,
-      gameEl: this.gameEl
-    });     
   }
 
   isGameComplete() {
-    return this.levelCnt >= this.levelCntMax;
-  }
-
-  isGameOver() {
-    return this.playerLife <= 0;
+    return this.levelCnt > this.levelCntMax;
   }
 
 }
@@ -79,7 +68,6 @@ class Menu {
 
   constructor(initObj) {
     this.gameObj = initObj.gameObj;
-    this.gameEl = initObj.gameEl;
 
     this.enemiesCntIndex = 2;
     this.enemiesCntLabels = {
@@ -100,11 +88,11 @@ class Menu {
   }
 
   render() {
-    this.gameEl.innerHTML = '';
+    this.gameObj.gameEl.innerHTML = '';
 
     const menuTpl = document.querySelector('#menuTpl');
     const menuTplClone = menuTpl.content.cloneNode(true);
-    this.gameEl.appendChild(menuTplClone);
+    this.gameObj.gameEl.appendChild(menuTplClone);
     
     const enemiesCntEl = document.getElementById('enemiesCnt');
     if (enemiesCntEl) {
@@ -141,8 +129,7 @@ class Menu {
         break;  
       case 51:
         this.stopKeysListen();  
-        console.log('startt');
-        this.gameObj.destroyMenu();
+        this.gameObj.controller('infoScreen');
     }     
   }
 
@@ -155,7 +142,6 @@ class InfoScreen {
     this.gameObj = initObj.gameObj;
     this.gameEl = initObj.gameEl;
     this.topText = initObj.topText;
-    this.bottomText = initObj.bottomText;
 
     this.render();
     this.startKeysListen();
@@ -170,9 +156,6 @@ class InfoScreen {
 
     const topText = document.getElementById('infoTextTop');
     if (topText) { topText.innerHTML = this.topText; }
-
-    const bottomText = document.getElementById('infoTextBottom');
-    if (bottomText) { bottomText.innerHTML = this.bottomText; }
   }
 
   destroy() {
@@ -182,11 +165,7 @@ class InfoScreen {
     }
 
     setTimeout(() => {
-      if (this.gameObj.isGameComplete()) { 
-        this.gameObj.reConstructor(); 
-      } else {
-        this.gameObj.startLevel();
-      }      
+      this.gameObj.controller('level');
     }, 1000);    
   }
 
@@ -217,11 +196,9 @@ class GameOverScreen {
   }
 
   render() {
-    console.log('go render')
     this.gameEl.innerHTML = '';
 
     const gameOverScreenTpl = document.querySelector('#gameOverScreenTpl');
-    console.log(gameOverScreenTpl)
     const gameOverScreenTplClone = gameOverScreenTpl.content.cloneNode(true);
     this.gameEl.appendChild(gameOverScreenTplClone);
 
@@ -234,6 +211,40 @@ class GameOverScreen {
     const gameOverTextEl = document.getElementById('gameOverText');    
     if (gameOverTextEl) {
       gameOverTextEl.classList += ' transform';
+      setTimeout(() => {
+        this.gameObj.reConstructor();    
+      }, 2000);       
+    }
+   
+  }
+
+}
+
+class GameCompleteScreen {
+
+  constructor(initObj) {
+    this.gameObj = initObj.gameObj;
+    this.gameEl = initObj.gameEl;
+
+    this.render();
+  }
+
+  render() {
+    this.gameEl.innerHTML = '';
+
+    const gameCompleteScreenTpl = document.querySelector('#gameCompleteScreenTpl');
+    const gameCompleteScreenTplClone = gameCompleteScreenTpl.content.cloneNode(true);
+    this.gameEl.appendChild(gameCompleteScreenTplClone);
+
+    setTimeout(() => {        
+      this.destroy();
+    }, 1000);      
+  }
+
+  destroy() {
+    const gameCompleteTextEl = document.getElementById('gameCompleteText');    
+    if (gameCompleteTextEl) {
+      gameCompleteTextEl.classList += ' transform';
       setTimeout(() => {
         this.gameObj.reConstructor();    
       }, 2000);       
@@ -263,19 +274,17 @@ class Level {
     this.gameEl.appendChild(end);  
 
     next.addEventListener('click', () => { 
-      if (this.gameObj.isGameComplete()) { 
-        this.gameObj.startGameComplete(); 
+      this.gameObj.levelCnt++;
+      if (this.gameObj.isGameComplete()) {
+        this.gameObj.controller('gameCompleteScreen');
       } else {
-        this.gameObj.levelCnt++;
-        this.gameObj.startInfoScreen();
-      }
+        this.gameObj.controller('infoScreen');
+      }      
     });  
 
     end.addEventListener('click', () => { 
       this.gameObj.playerLife = 0;
-      if (this.gameObj.isGameOver()) {
-        this.gameObj.startGameOver();
-      }      
+      this.gameObj.controller('gameOverScreen');     
     });
   }
 
