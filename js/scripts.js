@@ -7,6 +7,7 @@ class Game {
     this.levelCntMax = 3;
     this.playerLife = 100;
     this.menu = new Menu(this);
+    this.menuSettings = null;
   }
 
   reConstructor() {
@@ -17,8 +18,13 @@ class Game {
     this.menu = new Menu(this);    
   }
 
-  controller(action) {
+  controller(action, menuSettings) {
     let action_ = this.isGameComplete() ? 'gameCompleteScreen' : action;
+    if (menuSettings) {
+      this.menuSettings = menuSettings;
+    }
+    
+    console.log(this.menuSettings)
 
     switch(action_) {
       case 'infoScreen':
@@ -28,7 +34,7 @@ class Game {
         new GameCompleteScreen(this);      
         break;
       case 'level':
-        new Level(this);      
+        new Level(this, this.menuSettings);      
         break;
       case 'gameOverScreen':
         new GameOverScreen(this);     
@@ -56,9 +62,9 @@ class Menu {
     
     this.wallsStrengthIndex = 2;
     this.wallsStrengthLabels = {
-      0: 'Алмазные',
+      0: 'Кирпичные',
       1: 'Железобетонные',
-      2: 'Кирпичные'
+      2: 'Алмазные'
     };
 
     this.render();
@@ -107,12 +113,14 @@ class Menu {
         break;  
       case 51:
         this.stopKeysListen();  
-        this.gameObj.controller('infoScreen');
+        this.gameObj.controller('infoScreen', {
+          enemiesCntIndex: this.enemiesCntIndex,
+          wallsStrengthIndex: this.wallsStrengthIndex
+        });
     }     
   }
 
 }
-
 
 class InfoScreen {
 
@@ -226,33 +234,61 @@ class GameCompleteScreen {
 
 class Level {
 
-  constructor(gameObj) {
+  constructor(gameObj, menuSettings) {
+    console.log(menuSettings)
     this.gameObj = gameObj;
+    this.wallsStrengthIndex = menuSettings.wallsStrengthIndex;
+    this.wallsCnt = 10;
+    this.walls = [];
+    this.generateWalls();
     this.render();
+  }
+
+  generateWalls() {
+    for (let id = 0; id < 10; id++) {
+      const wall = new Wall(id, this.wallsStrengthIndex);
+    }
   }
 
   render() {
     this.gameObj.gameEl.innerHTML = '';
 
-    const next = document.createElement('div');
-    next.id = 'next';
-    next.innerHTML = 'to next level';
-    this.gameObj.gameEl.appendChild(next);
+    // const next = document.createElement('div');
+    // next.id = 'next';
+    // next.innerHTML = 'to next level';
+    // this.gameObj.gameEl.appendChild(next);
 
-    const end = document.createElement('div');
-    end.id = 'end';
-    end.innerHTML = 'to game over';
-    this.gameObj.gameEl.appendChild(end);  
+    // const end = document.createElement('div');
+    // end.id = 'end';
+    // end.innerHTML = 'to game over';
+    // this.gameObj.gameEl.appendChild(end);  
 
-    next.addEventListener('click', () => { 
-      this.gameObj.levelCnt++;
-      this.gameObj.controller('infoScreen');      
-    });  
+    // next.addEventListener('click', () => { 
+    //   this.gameObj.levelCnt++;
+    //   this.gameObj.controller('infoScreen');      
+    // });  
 
-    end.addEventListener('click', () => { 
-      this.gameObj.playerLife = 0;
-      this.gameObj.controller('gameOverScreen');     
-    });
+    // end.addEventListener('click', () => { 
+    //   this.gameObj.playerLife = 0;
+    //   this.gameObj.controller('gameOverScreen');     
+    // });
+  }
+
+}
+
+class Wall {
+
+  constructor(id, wallsStrengthIndex) {
+    this.id = id;
+    this.xCoord = Math.floor(Math.random() * (10));
+    this.yCoord = Math.floor(Math.random() * (10));
+    this.strength = wallsStrengthIndex;
+    console.log(id, this.xCoord, this.yCoord, this.strength)
+    this.render();
+  }
+
+  render() {
+
   }
 
 }
