@@ -18,21 +18,20 @@ class Game {
   }
 
   controller(action) {
-    switch(action) {
+    let action_ = this.isGameComplete() ? 'gameCompleteScreen' : action;
+
+    switch(action_) {
       case 'infoScreen':
-          this.infoScreen = new InfoScreen(this);
+        new InfoScreen(this);
         break;
-
       case 'gameCompleteScreen':
-        this.gameCompleteScreen = new GameCompleteScreen(this);      
+        new GameCompleteScreen(this);      
         break;
-
       case 'level':
-        this.level = new Level(this);      
+        new Level(this);      
         break;
-
       case 'gameOverScreen':
-        this.gameOverScreen = new GameOverScreen(this);     
+        new GameOverScreen(this);     
         break;        
     }
   }
@@ -247,11 +246,7 @@ class Level {
 
     next.addEventListener('click', () => { 
       this.gameObj.levelCnt++;
-      if (this.gameObj.isGameComplete()) {
-        this.gameObj.controller('gameCompleteScreen');
-      } else {
-        this.gameObj.controller('infoScreen');
-      }      
+      this.gameObj.controller('infoScreen');      
     });  
 
     end.addEventListener('click', () => { 
