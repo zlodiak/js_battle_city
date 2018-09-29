@@ -6,10 +6,7 @@ class Game {
     this.levelCnt = 1;
     this.levelCntMax = 3;
     this.playerLife = 100;
-
-    this.menu = new Menu({
-      gameObj: this
-    });
+    this.menu = new Menu(this);
   }
 
   reConstructor() {
@@ -17,11 +14,7 @@ class Game {
     this.levelCnt = 1;
     this.levelCntMax = 3;
     this.playerLife = 100;
-
-    this.menu = new Menu({
-      gameObj: this,
-      gameEl: this.gameEl
-    });    
+    this.menu = new Menu(this);    
   }
 
   controller(action) {
@@ -66,8 +59,8 @@ class Game {
 
 class Menu {
 
-  constructor(initObj) {
-    this.gameObj = initObj.gameObj;
+  constructor(gameObj) {
+    this.gameObj = gameObj;
 
     this.enemiesCntIndex = 2;
     this.enemiesCntLabels = {
