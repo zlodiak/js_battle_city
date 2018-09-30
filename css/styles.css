@@ -21,6 +21,7 @@ html, body {
 	flex-wrap: wrap;
 	justify-content: center;
 	align-items: center;  	
+	position: relative;
 }
 
 .wrap-menu {
@@ -100,3 +101,9 @@ html, body {
 		font-size: 10em;
 		opacity: 0;
 	}	
+
+.wall {
+	width: 80px;
+	height: 80px;
+	position: absolute;
+}	
