@@ -107,3 +107,10 @@ html, body {
 	height: 80px;
 	position: absolute;
 }	
+
+.enemy-tank {
+	width: 80px;
+	height: 80px;
+	position: absolute;	
+	background: red;
+}

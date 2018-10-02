@@ -235,11 +235,12 @@ class GameCompleteScreen {
 class Level {
 
   constructor(gameObj, menuSettings) {
-    console.log(menuSettings)
     this.gameObj = gameObj;
     this.wallsStrengthIndex = menuSettings.wallsStrengthIndex;
     this.wallsCnt = 30;
+    this.enemyTanksCnt = 6;
     this.walls = [];    
+    this.enemyTanks = [];    
     this.render();
   }
 
@@ -250,6 +251,13 @@ class Level {
     }
   }
 
+  generateEnemyTanks() {
+    for (let id = 0; id < this.enemyTanksCnt; id++) {
+      const enemyTank = new EnemyTank(this, this.gameObj.gameEl, id);
+      this.enemyTanks.push(enemyTank);
+    }
+  }  
+
   deleteWall(id) {
     this.walls.forEach((w, i) => {
       if (this.walls[i] && this.walls[i].id === id) {
@@ -258,29 +266,18 @@ class Level {
     })
   }
 
+  deleteEnemyTank(id) {
+    this.enemyTanks.forEach((w, i) => {
+      if (this.enemyTanks[i] && this.enemyTanks[i].id === id) {
+        this.enemyTanks.splice(i, 1);
+      }      
+    })
+  }  
+
   render() {
     this.gameObj.gameEl.innerHTML = '';
     this.generateWalls();
-
-    // const next = document.createElement('div');
-    // next.id = 'next';
-    // next.innerHTML = 'to next level';
-    // this.gameObj.gameEl.appendChild(next);
-
-    // const end = document.createElement('div');
-    // end.id = 'end';
-    // end.innerHTML = 'to game over';
-    // this.gameObj.gameEl.appendChild(end);  
-
-    // next.addEventListener('click', () => { 
-    //   this.gameObj.levelCnt++;
-    //   this.gameObj.controller('infoScreen');      
-    // });  
-
-    // end.addEventListener('click', () => { 
-    //   this.gameObj.playerLife = 0;
-    //   this.gameObj.controller('gameOverScreen');     
-    // });
+    this.generateEnemyTanks();
   }
 
 }
@@ -325,5 +322,36 @@ class Wall {
       this.levelObj.deleteWall(this.id);
     }
   }
+
+}
+
+class EnemyTank {
+
+  constructor(levelObj, fieldEl, id) {
+    this.levelObj = levelObj;
+    this.fieldEl = fieldEl;
+    this.id = id;
+    this.xCoord = Math.floor(Math.random() * (10));
+    this.yCoord = Math.floor(Math.random() * (10)); 
+    this.size = 80;
+    this.render();
+  }
+
+  render() {
+    const enemyTankEl = document.createElement('div');
+    enemyTankEl.id = 'enemyTank_' + this.id;
+    enemyTankEl.classList += 'enemy-tank';
+    enemyTankEl.style.left = this.xCoord * this.size + 'px';
+    enemyTankEl.style.top = this.yCoord * this.size + 'px';
+    this.fieldEl.appendChild(enemyTankEl);
+  }
+
+  destroy() {
+    const wallEl = document.getElementById('enemyTank_' + this.id);
+    if (wallEl) {
+      wallEl.remove();
+      this.levelObj.deleteEnemyTank(this.id);
+    }
+  }  
 
 }
