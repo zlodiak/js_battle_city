@@ -23,8 +23,6 @@ class Game {
     if (menuSettings) {
       this.menuSettings = menuSettings;
     }
-    
-    console.log(this.menuSettings)
 
     switch(action_) {
       case 'infoScreen':
@@ -240,9 +238,16 @@ class Level {
     this.wallsCnt = 30;
     this.enemyTanksCnt = 6;
     this.walls = [];    
-    this.enemyTanks = [];    
+    this.enemyTanks = [];   
+    this.objSize = 80; 
     this.render();
   }
+
+  render() {
+    this.gameObj.gameEl.innerHTML = '';
+    this.generateWalls();
+    this.generateEnemyTanks();
+  }  
 
   generateWalls() {
     for (let id = 0; id < this.wallsCnt; id++) {
@@ -252,10 +257,15 @@ class Level {
   }
 
   generateEnemyTanks() {
+    this.enemyTanks = [];
     for (let id = 0; id < this.enemyTanksCnt; id++) {
       const enemyTank = new EnemyTank(this, this.gameObj.gameEl, id);
-      this.enemyTanks.push(enemyTank);
+      if (!this.isCollideWithWall(enemyTank.xCoord, enemyTank.yCoord)) {
+        this.enemyTanks.push(enemyTank);
+      }      
     }
+    if (this.enemyTanks.length < this.enemyTanksCnt) { this.generateEnemyTanks(); }
+    this.enemyTanks.forEach(t => t.render());
   }  
 
   deleteWall(id) {
@@ -274,10 +284,20 @@ class Level {
     })
   }  
 
-  render() {
-    this.gameObj.gameEl.innerHTML = '';
-    this.generateWalls();
-    this.generateEnemyTanks();
+  isCollideWithWall(xCoordObj, yCoordObj) {
+    let isCollide = false;
+
+    this.walls.forEach(w => {
+      if (w.xCoord === xCoordObj && 
+          w.xCoord + this.objSize === xCoordObj + this.objSize && 
+          w.yCoord === yCoordObj && 
+          w.yCoord + this.objSize === yCoordObj + this.objSize) 
+      {
+        isCollide = true;
+      }
+    });
+
+    return isCollide;
   }
 
 }
@@ -288,14 +308,14 @@ class Wall {
     this.levelObj = levelObj;
     this.fieldEl = fieldEl;
     this.id = id;
-    this.xCoord = Math.floor(Math.random() * (10));
-    this.yCoord = Math.floor(Math.random() * (10));
-    this.strength = wallsStrengthIndex;    
-    this.size = 80;
+    this.size = levelObj.objSize;
+    this.xCoord = Math.floor(Math.random() * (10)) * this.size;
+    this.yCoord = Math.floor(Math.random() * (10)) * this.size;
+    this.strength = wallsStrengthIndex;        
     switch(wallsStrengthIndex) {
       case 0: this.background = 'red'; break;
       case 1: this.background = 'grey'; break;
-      case 2: this.background = 'cyan'; break;                
+      case 2: this.background = 'cyan'; break;
     }
     this.render();
   }
@@ -305,8 +325,8 @@ class Wall {
     wallEl.id = 'wall_' + this.id;
     wallEl.classList += 'wall';
     wallEl.style.background = this.background;
-    wallEl.style.left = this.xCoord * this.size + 'px';
-    wallEl.style.top = this.yCoord * this.size + 'px';
+    wallEl.style.left = this.xCoord + 'px';
+    wallEl.style.top = this.yCoord + 'px';
     this.fieldEl.appendChild(wallEl);
 
     document.getElementById('wall_' + this.id).addEventListener('click', () => {
@@ -331,19 +351,24 @@ class EnemyTank {
     this.levelObj = levelObj;
     this.fieldEl = fieldEl;
     this.id = id;
-    this.xCoord = Math.floor(Math.random() * (10));
-    this.yCoord = Math.floor(Math.random() * (10)); 
-    this.size = 80;
-    this.render();
+    this.size = levelObj.objSize;
+    this.xCoord = Math.floor(Math.random() * (10)) * this.size;
+    this.yCoord = Math.floor(Math.random() * (10)) * this.size;  
+    this.enemyTankEl;
+    this.create();
+  }
+
+  create() {
+    this.enemyTankEl = document.createElement('div');
+    this.enemyTankEl.id = 'enemyTank_' + this.id;
+    this.enemyTankEl.innerHTML = 'enemyTank';
+    this.enemyTankEl.classList += 'enemy-tank';
+    this.enemyTankEl.style.left = this.xCoord + 'px';
+    this.enemyTankEl.style.top = this.yCoord + 'px';
   }
 
   render() {
-    const enemyTankEl = document.createElement('div');
-    enemyTankEl.id = 'enemyTank_' + this.id;
-    enemyTankEl.classList += 'enemy-tank';
-    enemyTankEl.style.left = this.xCoord * this.size + 'px';
-    enemyTankEl.style.top = this.yCoord * this.size + 'px';
-    this.fieldEl.appendChild(enemyTankEl);
+    this.fieldEl.appendChild(this.enemyTankEl);
   }
 
   destroy() {
